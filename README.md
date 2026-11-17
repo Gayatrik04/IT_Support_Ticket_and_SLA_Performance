@@ -1,99 +1,115 @@
-# IT_Support_Ticket_and_SLA_Performance
-
 # IT Support Ticket Analysis & SLA Performance
 
-Analysis of 2,330 IT support tickets to find out where we're meeting SLA commitments — and where we're not — and to turn that into a clear action plan.
-
-![Python](https://img.shields.io/badge/Python-Data%20Analysis-3776AB?logo=python&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-Business%20Queries-4479A1?logo=mysql&logoColor=white)
-![Power BI](https://img.shields.io/badge/Power%20BI-Executive%20Dashboard-F2C811?logo=powerbi&logoColor=black)
-
-## Why This Project Exists
-
-Support teams generate huge volumes of ticket data, but most of it never turns into a decision. Without structured analysis, SLA breaches get discovered reactively — through customer complaints — instead of proactively; staffing doesn't get aligned to real demand; and agent coaching or product fixes don't get prioritized by actual impact.
-
-This project was built to close that gap: take a year of raw ticket logs and turn them into three concrete answers —
-1. Are we meeting our SLA commitments, and where exactly are we falling short?
-2. Is ticket demand predictable enough to staff against?
-3. Which agents and product lines are driving the best — and worst — outcomes?
-
-## How It Was Built
-
-1. **Clean the data (Python)** — raw timestamps were stored as text; converted six timestamp fields to proper datetime values so durations could be calculated reliably.
-2. **Engineer features (Python)** — derived response time, resolution time, business-hours vs. after-hours, weekday/weekend, and an SLA-delay measure (actual first response vs. the SLA target) from the cleaned timestamps.
-3. **Explore the data (Python)** — charted ticket volume by month/weekday, ticket composition by product/topic/channel, and SLA compliance rates.
-4. **Answer targeted business questions (SQL)** — used window functions to rank agents by volume, find the top agent per support tier, and measure month-over-month ticket growth.
-5. **Build the dashboard (Power BI)** — packaged everything into a 4-page, filterable executive dashboard so the findings stay usable beyond this one report.
-
-## The Dataset
-
-2,330 tickets, 8 agents, 12 countries, 12 months. Each ticket record includes:
-
-- **Ticket attributes** — Priority, Source (channel), Topic, Product group, Support Level, Country
-- **Ownership** — Agent Group, Agent Name
-- **Timestamps** — Created, Expected SLA (first response & resolution), actual First response, Resolution, Close
-- **Outcome data** — Agent interactions, customer satisfaction survey score
-
-Not every ticket is "complete" — 18 tickets had no first response yet and 1,173 weren't yet closed at the time of extraction. Those gaps were left as-is rather than filled in, because a ticket that's genuinely still open shouldn't be counted as resolved.
+Analysis of 2,330 IT support tickets (January–December 2023) to measure SLA performance, find where resolution commitments are missed, and turn the findings into practical recommendations.
 
 ## Headline Result
 
-> We answer customers on time **87%** of the time, but only **resolve** tickets on time **66%** of the time — roughly **1 in 3 tickets** misses its resolution commitment.
+> First responses meet SLA **86.7%** of the time, but only **66.4%** of tickets are **resolved** within SLA, so roughly **1 in 3 tickets** misses its resolution commitment.
 
 | Metric | Result |
 |---|---|
 | Total tickets | 2,330 |
-| Countries served | 12 |
+| Countries | 12 |
+| Agents | 8 |
 | First Response SLA | 86.7% |
 | Resolution SLA | 66.4% |
-| Avg. satisfaction | 3.51 / 5 |
+| Avg. resolution time | ~33.2 hrs |
+| Avg. satisfaction | 3.51 / 5 (1,173 survey responses) |
 
-## Key Insights
+## Business Questions
 
-- **Ready to Use Software drives outsized risk** — 43% of all tickets and 41% of all SLA violations trace back to this one product line.
-- **Medium-priority tickets are the weak point, not High-priority ones** — 35% violation rate and 34.9-hr average resolution time, both worse than High-priority tickets (30% violation, 33.2 hrs).
-- **Agent strengths don't overlap** — Nicola Wane handles the most tickets (367) but isn't top-rated; Connor Danielovitch has the highest satisfaction (4.07/5) but a below-average resolution SLA rate (62%); Heather Urry resolves fastest (26.2 hrs avg) with the best SLA rate (76%) despite the lowest ticket volume.
-- **Demand follows a clear rhythm** — Wednesday and Monday are consistently the busiest weekdays; weekends run ~60% lighter; January, May, and November are recurring monthly peaks.
-- **Email is the busiest and likely the slowest channel** — 53% of tickets arrive by email, and it's a probable driver of first-response SLA misses.
-- **Product Setup is a satisfaction problem, not just a volume problem** — it's the highest-volume topic (630 tickets) and the lowest-satisfaction one (3.4/5), and the two are connected.
-- **First response and resolution tell different stories** — 86.7% first-response compliance vs. 66.4% resolution compliance shows the team is fast to engage but slower to follow through.
+1. Are SLA commitments being met, and where are they missed?
+2. How does ticket demand vary by weekday and month?
+3. How do agents and product lines compare on volume, speed and customer satisfaction?
 
-## Business Impact
+## How It Was Built
 
-- **Resolution SLA, not First Response SLA, is the real risk.** Customers are heard quickly, but nearly a third of promises to resolve their issue aren't kept — that's the metric most likely to erode trust and retention.
-- **The gap is concentrated, not diffuse.** It's traceable to one product line, one priority tier, and one channel — which means it's fixable with targeted effort rather than a costly operation-wide overhaul.
-- **Demand is predictable**, so staffing costs can be optimized rather than spread evenly across days that don't need equal coverage.
-- **Coaching, not hiring, is the fastest lever on agent performance** — the team already has agents excelling at speed and at satisfaction; the gap is spreading those strengths across the team.
+1. **Clean the data (Python):** raw timestamps were stored as text, so six timestamp fields were converted to datetime to allow reliable duration calculations. Missing first-response, resolution and close times were left as nulls, not imputed.
+2. **Engineer features (Python):** calendar fields (year, month, weekday, hour), weekday/weekend, business hours (9:00–18:00) vs. after hours, response time, resolution time, close duration, and response delay against the SLA target.
+3. **Explore the data (Python):** ticket volume by month and weekday, composition by product, topic and channel, and SLA compliance.
+4. **Answer targeted questions (SQL, MySQL):** window functions (`RANK`, `ROW_NUMBER`, `LAG`) to rank agents, find the top agent per support group, and measure month-over-month ticket change.
+5. **Build the dashboard (Power BI, DAX):** a 4-page filterable dashboard covering executive overview, agent performance, customer and product insights, and operations and SLA performance.
+
+## The Dataset
+
+2,330 tickets and 22 columns, created January–December 2023, across 8 agents and 12 countries.
+
+- **Ticket attributes:** Priority, Source (channel), Topic, Product group, Support Level, Country
+- **Ownership:** Agent Group, Agent Name
+- **Timestamps:** Created, Expected SLA (first response and resolution), actual First response, Resolution, Close
+- **SLA flags:** SLA for first response, SLA for resolution (Within SLA / SLA Violated)
+- **Outcomes:** Agent interactions, customer satisfaction survey score
+
+**Ticket status at extraction:** 1,173 closed, 739 resolved, 400 in progress, 18 open. The 18 open tickets have no first response yet. Satisfaction scores exist only for 1,173 tickets.
+
+## Key Findings
+
+- **Resolution, not first response, is the weak point.** 86.7% of tickets meet the first-response target versus 66.4% for resolution.
+- **Resolution misses are spread broadly, not concentrated in one segment.** Violation rates sit between 30% and 37% across every priority and product group:
+
+  | Segment | Violation rate |
+  |---|---|
+  | Custom software development | 37.4% (241 / 644) |
+  | Other | 33.6% (116 / 345) |
+  | Ready to use software | 31.9% (322 / 1,010) |
+  | Training and consulting | 31.4% (104 / 331) |
+  | Priority: Medium / Low / High | 35.0% / 33.9% / 30.3% |
+
+- **Ready to Use Software is the largest contributor by volume:** 43% of tickets and 41% of violations, in line with its size. Custom software development has the highest violation rate.
+- **Medium-priority tickets have the highest violation rate (35.0%) and the longest average resolution time (34.9 hrs)**, versus High (30.3%, 33.2 hrs) and Low (33.9%, 32.3 hrs). The differences are modest and worth reviewing rather than conclusive.
+- **Agent performance varies across metrics:**
+
+  | Agent | Tickets | Avg. satisfaction | Avg. resolution (hrs) | Resolution SLA |
+  |---|---|---|---|---|
+  | Nicola Wane | 367 | 3.36 | 34.40 | 64% |
+  | Sheela Cutten | 364 | 3.65 | 31.37 | 70% |
+  | Bernard Beckley | 359 | 3.41 | 33.55 | 66% |
+  | Connor Danielovitch | 347 | 4.07 | 35.68 | 62% |
+  | Kristos Westoll | 333 | 3.23 | 35.65 | 66% |
+  | Adolpho Messingham | 197 | 3.46 | 33.15 | 64% |
+  | Michele Whyatt | 186 | 3.40 | 32.56 | 68% |
+  | Heather Urry | 177 | 3.37 | 26.18 | 76% |
+
+  Connor has the highest satisfaction but the lowest resolution SLA rate. Heather is the fastest with the best SLA rate, on the lowest volume. Sheela is consistently strong on all three measures.
+- **Demand by weekday and month:** Wednesday (439) and Monday (410) are the busiest weekdays. Weekend tickets are about 15% of the total, and weekend days average roughly 56% fewer tickets than weekdays. Monthly volume peaked in January (224), May (219) and November (213), and was lowest in February (159).
+- **Email is the largest channel:** 1,234 tickets (53%), followed by Chat (850) and Phone (246).
+- **Product Setup is both the highest-volume topic (630 tickets) and the lowest-rated (3.4 / 5).** Topic averages range only from about 3.4 to 3.8.
 
 ## Recommendations
 
-1. **Make Resolution SLA the primary metric for the next improvement cycle**, not First Response SLA — it has the larger gap (33.6% violation) and the larger impact on customer trust.
-2. **Run a focused SLA-improvement initiative on Ready to Use Software.** It accounts for 43% of ticket volume and 41% of all SLA violations — even a modest improvement here moves the company-wide number meaningfully.
-3. **Investigate Medium-priority ticket handling specifically.** Its 35% violation rate and 34.9-hr average resolution time exceed High-priority tickets, which is counter-intuitive — likely a queue-prioritization rule worth auditing.
-4. **Use top performers as internal coaching benchmarks**: pair Heather Urry's resolution speed (26.2 hrs avg, 76% SLA) with Connor Danielovitch's customer-satisfaction approach (4.07/5) as a combined playbook for the rest of the team.
-5. **Align staffing with actual demand.** Add coverage for Monday/Wednesday and the January/May/November peaks; consider redeploying weekend headcount to weekdays given the ~60% weekend volume drop.
-6. **Fix Product Setup friction.** It's simultaneously the highest-volume topic and the lowest-satisfaction one — improved onboarding docs or in-product guidance should reduce both ticket volume and dissatisfaction at once.
-7. **Review Email response workflows.** It's the busiest channel (53% of tickets) and the most likely driver of first-response SLA misses.
+1. **Make Resolution SLA the primary metric for the next improvement cycle:** it has the larger gap (33.6% violated).
+2. **Treat the misses as a process-level issue.** Since every segment is at 30–37%, look at capacity, escalation and hand-offs, and whether the resolution targets are realistic, instead of fixing a single segment. Start with Custom software development (highest rate) and Ready to use software (largest volume).
+3. **Review Medium-priority ticket handling**, including how queues are prioritised, to find out why it trails High priority.
+4. **Use strong performers as coaching references:** Heather Urry (speed), Sheela Cutten (balanced speed, SLA and satisfaction) and Connor Danielovitch (satisfaction). Check differences in agent group and ticket mix first.
+5. **Review staffing against weekday demand.** Weekend volume is much lower; confirm the Monday/Wednesday and monthly peaks with more than one year of data before changing coverage.
+6. **Improve Product Setup onboarding content**, since it has the highest volume and the lowest satisfaction.
+7. **Analyse response time and SLA by channel before changing Email workflows.** This was not covered in this project.
 
 ## Dashboard
 
-4-page interactive Power BI dashboard — Executive Overview, Agent Performance, Customer & Product Insights, Operations & SLA Performance — filterable by Month, Priority, Source, Product, Country, Topic, and Agent Group.
+4-page interactive Power BI dashboard with slicers (Month, Priority, Source, Product group, Country, Topic, Agent group, depending on the page).
 
-![executive_overview.png](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/screenshort/executive_overview.png)
-![agent_performance_dashboard.png](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/screenshort/agent_performance_dashboard.png)
-![customer_and_product_insights.png](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/screenshort/customer_and_product_insights.png
-)
-![operations_and_sla_performance.png](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/screenshort/operations_and_sla_performance.png)
+![Executive Overview](screenshort\executive_overview.png)
+![Agent Performance](screenshort\agent_performance_dashboard.png)
+![Customer and Product Insights](screenshort\customer_and_product_insights.png)
+![Operations and SLA Performance](screenshort\operations_and_sla_performance.png)
 
 ## Reports in This Repo
 
-- 📄 [Detailed Technical Report](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/IT_Support_Ticket_Analysis_Report.pdf) — full methodology
-- 📊 [Executive Summary](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/IT_Support_Ticket_Executive_Summary.pdf) — stakeholder version
-- 🖥️ [Stakeholder Slide Deck](IT_Support_Ticket_Analysis_&_SLA_Performance_Dashboard/IT_Support_Ticket_Executive_Summary (1).pptx)
+- [Detailed Technical Report](IT_Support_Ticket_Analysis_Report.pdf): full methodology
+- [Executive Summary](IT_Support_Ticket_Executive_Summary.pdf): stakeholder version
+- [Stakeholder Slide Deck](IT_Support_Ticket_Executive_Summary.pptx)
 
-> Update these paths to match your repo's actual folder layout before pushing.
+## Limitations
+
+- **One year of data (2023):** peaks and weekday patterns are descriptive; seasonality cannot be separated from one-off variation.
+- **Unresolved tickets:** the 66.4% resolution SLA is calculated over all 2,330 tickets, including the 418 still open or in progress at extraction. Their SLA status comes from the dataset's own flag.
+- **Satisfaction scores** exist for 1,173 tickets only.
+- **Agent comparisons** are not adjusted for agent group, priority or product mix, and ticket volumes differ by almost 2x between agents.
+- **Priority and product differences** are modest and were not tested for statistical significance.
+- **Channel-level performance** (response time and SLA by channel) was not analysed.
 
 ## About
 
-**Gayatri Kasbekar** 
-📧 gayatrikasbekar1311@gmail.com &nbsp;|&nbsp; 🔗 [GitHub — Gayatrik04](https://github.com/Gayatrik04)
+**Gayatri Kasbekar**
+📧 gayatrikasbekar1311@gmail.com &nbsp;|&nbsp; 🔗 [GitHub: Gayatrik04](https://github.com/Gayatrik04) &nbsp;|&nbsp; 🔗 [LinkdeIn: Gayatri Kasbekar](https://www.linkedin.com/in/gayatri-kasbekar-674a883a3/)
