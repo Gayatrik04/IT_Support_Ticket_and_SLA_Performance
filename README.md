@@ -89,9 +89,12 @@ Analysis of 2,330 IT support tickets (January–December 2023) to measure SLA pe
 
 4-page interactive Power BI dashboard with slicers (Month, Priority, Source, Product group, Country, Topic, Agent group, depending on the page).
 
-![Executive Overview](screenshort/executive_overview.pn)
+![Executive Overview](screenshort/executive_overview.png)
+
 ![Agent Performance](screenshort/agent_performance_dashboard.png)
+
 ![Customer and Product Insights](screenshort/customer_and_product_insights.png)
+
 ![Operations and SLA Performance](screenshort/operations_and_sla_performance.png)
 
 ## Reports in This Repo
